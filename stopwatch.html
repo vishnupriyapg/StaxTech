@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stopwatch App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #121212, #1e1e1e);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background: #222;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 255, 247, 0.2);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #00fff7;
+    }
+    .time {
+      font-size: 3em;
+      margin: 20px 0;
+    }
+    .buttons button {
+      background: #00fff7;
+      border: none;
+      color: #000;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .buttons button:hover {
+      background: #00cccc;
+    }
+    .laps {
+      margin-top: 30px;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .lap {
+      background: #333;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stopwatch</h1>
+    <div class="time" id="display">00:00:00</div>
+    <div class="buttons">
+      <button id="startStopBtn">Start</button>
+      <button id="pauseResumeBtn" disabled>Pause</button>
+      <button onclick="reset()">Reset</button>
+      <button onclick="recordLap()" id="lapBtn" disabled>Lap</button>
+    </div>
+    <div class="laps" id="laps">
+      <h3>Lap Times:</h3>
+    </div>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let interval;
+    let isRunning = false;
+    let lapCounter = 1;
+
+    const display = document.getElementById('display');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+    const lapBtn = document.getElementById('lapBtn');
+    const lapsContainer = document.getElementById('laps');
+
+    startStopBtn.addEventListener('click', () => {
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        interval = setInterval(updateDisplay, 100);
+        isRunning = true;
+        startStopBtn.disabled = true;
+        pauseResumeBtn.disabled = false;
+        lapBtn.disabled = false;
+      }
+    });
+
+    pauseResumeBtn.addEventListener('click', () => {
+      if (isRunning) {
+        clearInterval(interval);
+        elapsedTime = Date.now() - startTime;
+        isRunning = false;
+        pauseResumeBtn.textContent = 'Resume';
+      } else {
+        startTime = Date.now() - elapsedTime;
+        interval = setInterval(updateDisplay, 100);
+        isRunning = true;
+        pauseResumeBtn.textContent = 'Pause';
+      }
+    });
+
+    function reset() {
+      clearInterval(interval);
+      startTime = 0;
+      elapsedTime = 0;
+      isRunning = false;
+      lapCounter = 1;
+      display.textContent = '00:00:00';
+      lapsContainer.innerHTML = '<h3>Lap Times:</h3>';
+      startStopBtn.disabled = false;
+      pauseResumeBtn.disabled = true;
+      lapBtn.disabled = true;
+      pauseResumeBtn.textContent = 'Pause';
+    }
+
+    function recordLap() {
+      if (isRunning) {
+        const lapTime = display.textContent;
+        const lapElement = document.createElement('div');
+        lapElement.className = 'lap';
+        lapElement.textContent = `Lap ${lapCounter++}: ${lapTime}`;
+        lapsContainer.appendChild(lapElement);
+      }
+    }
+
+    function updateDisplay() {
+      elapsedTime = Date.now() - startTime;
+      const time = new Date(elapsedTime);
+      const minutes = String(time.getUTCMinutes()).padStart(2, '0');
+      const seconds = String(time.getUTCSeconds()).padStart(2, '0');
+      const milliseconds = String(Math.floor(time.getUTCMilliseconds() / 10)).padStart(2, '0');
+      display.textContent = `${minutes}:${seconds}:${milliseconds}`;
+    }
+  </script>
+</body>
+</html>
